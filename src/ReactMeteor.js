@@ -113,13 +113,12 @@ function renderInPlaceOfNode(reactElement, targetNode) {
 ReactMeteor = {
   Mixin: ReactMeteorMixin,
 
-  container: undefined,
-
   // So you don't have to mix in ReactMeteor.Mixin explicitly.
   createClass: function createClass(spec) {
     spec.mixins = spec.mixins || [];
     spec.mixins.push(ReactMeteorMixin);
     var Cls = React.createClass(spec);
+    var renderContainer;
 
     if (Meteor.isClient &&
         typeof Template === "function" &&
@@ -134,7 +133,7 @@ ReactMeteor = {
       );
 
       template.onRendered(function() {
-        this.container = renderInPlaceOfNode(
+        renderContainer = renderInPlaceOfNode(
           // Equivalent to <Cls {...this.data} />:
           React.createElement(Cls, this.data || {}),
           this.find("span")
@@ -142,7 +141,7 @@ ReactMeteor = {
       });
 
       template.onDestroyed(function() {
-        React.unmountComponentAtNode(this.container);
+        React.unmountComponentAtNode(renderContainer);
       });
 
       Template[spec.templateName] = template;
